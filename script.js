@@ -58,16 +58,19 @@ function updateMessage(days) {
     let currentMessage = localStorage.getItem('currentMessage');
 
     // Если осталось меньше недели или 1 день, показываем специальные сообщения
-    if (days <= 7) {
+    if (days <= 7 && days > 1) {
         currentMessage = 'Осталась всего неделя! Ура! 🎉';
+        localStorage.setItem('currentMessage', currentMessage);
+        console.log('Осталась неделя, обновили сообщение:', currentMessage);
     } else if (days <= 1) {
         currentMessage = 'Завтра лето! Готовимся! 🏝️';
-    } else {
+        localStorage.setItem('currentMessage', currentMessage);
+        console.log('Остался 1 день, обновили сообщение:', currentMessage);
+    } else if (!currentMessage) {
         // Если нет сохранённого сообщения, выбираем новое
-        if (!currentMessage) {
-            currentMessage = messages[Math.floor(Math.random() * messages.length)];
-            localStorage.setItem('currentMessage', currentMessage);
-        }
+        currentMessage = messages[Math.floor(Math.random() * messages.length)];
+        localStorage.setItem('currentMessage', currentMessage);
+        console.log('Нет сохранённого сообщения, выбрали новое:', currentMessage);
     }
 
     messageElement.textContent = currentMessage;
@@ -78,11 +81,15 @@ function changeMessage() {
     const now = new Date();
     const days = Math.floor((summerDate - now) / (1000 * 60 * 60 * 24));
 
-    if (days <= 7) return; // Не меняем, если осталось меньше недели
+    if (days <= 7) {
+        console.log('Осталось меньше недели, не меняем сообщение');
+        return; // Не меняем, если осталось меньше недели
+    }
 
     const newMessage = messages[Math.floor(Math.random() * messages.length)];
     localStorage.setItem('currentMessage', newMessage);
     document.getElementById('message').textContent = newMessage;
+    console.log('Сменили сообщение на:', newMessage);
 }
 
 // Пасхалка: клик по таймеру
@@ -104,5 +111,12 @@ document.getElementById('countdown-timer').addEventListener('click', () => {
 document.addEventListener('DOMContentLoaded', () => {
     updateCountdown();
     setInterval(updateCountdown, 1000);
-    setInterval(changeMessage, 15000); // Меняем сообщение каждые 15 секунд
+    // Проверяем и меняем сообщение каждые 15 секунд
+    setInterval(() => {
+        const now = new Date();
+        const days = Math.floor((summerDate - now) / (1000 * 60 * 60 * 24));
+        if (days > 7) {
+            changeMessage();
+        }
+    }, 15000);
 });
